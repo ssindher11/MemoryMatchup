@@ -1,7 +1,11 @@
 package com.cutetech.memorymatchup.presentation.game
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,31 +21,47 @@ import com.cutetech.memorymatchup.presentation.BackgroundGradient
 
 @Composable
 fun GameScreen() {
-    var cardFace by remember { mutableStateOf(CardFace.Front) }
-    val tileState = remember {
-        TileState(
-            isRevealed = false,
-            tile = Tile("dragon", drawable.dragon)
-        )
-    }
-
     BackgroundGradient {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            ImageTile(
-                cardFace = cardFace,
-                onClick = { cardFace = cardFace.next },
-                modifier = Modifier.size(100.dp),
-                front = {
-                    FrontFace()
-                },
-                back = {
-                    BackFace(tileState = tileState)
-                }
-            )
+            val isPaused by remember { mutableStateOf(true) }
+
+            Column(Modifier.fillMaxSize()) {
+
+            }
+
+            if (isPaused) {
+                PauseBox(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxHeight(0.6f)
+                        .fillMaxWidth(),
+                    onResume = {},
+                    onExit = {}
+                )
+            }
         }
     }
-
 }
+/*
+var cardFace by remember { mutableStateOf(CardFace.Front) }
+val tileState = remember {
+    TileState(
+        isRevealed = false,
+        tile = Tile("dragon", drawable.dragon)
+    )
+}
+
+ImageTile(
+    cardFace = cardFace,
+    onClick = { cardFace = cardFace.next },
+    modifier = Modifier.size(100.dp),
+    front = {
+        FrontFace()
+    },
+    back = {
+        BackFace(tileState = tileState)
+    }
+)*/
