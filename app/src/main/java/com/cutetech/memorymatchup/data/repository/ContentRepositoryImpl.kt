@@ -39,11 +39,11 @@ class ContentRepositoryImpl @Inject constructor() : ContentRepository {
 
     override suspend fun getTiles(numberOfTiles: Int): Flow<Resource<List<Tile>>> {
         require(numberOfTiles % 2 == 0) { "Number of tiles must be even" }
-        require(numberOfTiles <= tilesList.size) { "Number of tiles cannot be more than ${tilesList.size}" }
+        require(numberOfTiles / 2 <= tilesList.size) { "Number of tiles cannot be more than ${tilesList.size}" }
         return flow {
             emit(Resource.Loading(true))
-            val halfList = tilesList.shuffled().take(numberOfTiles)
-            val otherHalf = tilesList.shuffled()
+            val halfList = tilesList.shuffled().take(numberOfTiles / 2)
+            val otherHalf = halfList.shuffled()
             val combinedList = (halfList + otherHalf).shuffled()
             emit(Resource.Success(combinedList))
         }.flowOn(Dispatchers.IO)

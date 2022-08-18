@@ -1,6 +1,5 @@
 package com.cutetech.memorymatchup.presentation.game
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -45,7 +44,7 @@ fun PauseBox(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) Color.Transparent else AccentBlue)
+            .background(AccentBlue)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
@@ -56,7 +55,7 @@ fun PauseBox(
         Box(modifier = Modifier.fillMaxSize()) {
             Text(
                 text = stringResource(id = string.paused),
-                color = Color.White,
+                color = Color.Black,
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Medium,
                 fontFamily = museoFontFamily,
@@ -133,7 +132,7 @@ private fun BlurredBox() {
             .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
             .background(
                 brush = LinearGradient(
-                    colors = listOf(Color(0x66FFFFFF), Color(0x00FFFFFF), Color(0x66FFFFFF)),
+                    colors = listOf(Color(0xFFFFFFFF), Color(0x00FFFFFF), Color(0xFFFFFFFF)),
                     angleInDegrees = 135f
                 )
             )
@@ -145,7 +144,7 @@ private fun BlurredBox() {
             .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
             .background(
                 brush = LinearGradient(
-                    colors = listOf(Color(0x66FFFFFF), Color(0x00FFFFFF), Color(0x66FFFFFF)),
+                    colors = listOf(Color(0xFFFFFFFF), Color(0x00FFFFFF), Color(0xFFFFFFFF)),
                     angleInDegrees = 45f
                 )
             )
@@ -156,7 +155,7 @@ private fun BlurredBox() {
             .fillMaxSize()
             .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
             .background(
-                brush = Brush.radialGradient(listOf(Color(0x66FFFFFF), Color(0x00FFFFFF)))
+                brush = Brush.radialGradient(listOf(Color(0xFFFFFFFF), Color(0x00FFFFFF)))
             )
     )
 }
