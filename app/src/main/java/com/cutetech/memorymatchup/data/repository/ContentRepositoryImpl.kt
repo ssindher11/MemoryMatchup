@@ -45,6 +45,7 @@ class ContentRepositoryImpl @Inject constructor() : ContentRepository {
             val halfList = tilesList.shuffled().take(numberOfTiles / 2)
             val otherHalf = halfList.shuffled()
             val combinedList = (halfList + otherHalf).shuffled()
+            emit(Resource.Loading(false))
             emit(Resource.Success(combinedList))
         }.flowOn(Dispatchers.IO)
     }

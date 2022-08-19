@@ -1,8 +1,10 @@
 package com.cutetech.memorymatchup.presentation.game
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
@@ -16,10 +18,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,39 +40,42 @@ import com.cutetech.memorymatchup.ui.theme.museoFontFamily
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImageTile(
-    cardFace: CardFace,
+    tileState: TileState,
     modifier: Modifier = Modifier,
     onClick: (CardFace) -> Unit,
-    back: @Composable () -> Unit = {},
-    front: @Composable () -> Unit = {},
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val rotation = animateFloatAsState(
-        targetValue = cardFace.angle,
+        targetValue = tileState.cardFace.angle,
         animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
     )
-    Card(
-        onClick = {
-            onClick(cardFace)
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-        },
-        modifier = modifier
-            .aspectRatio(1f)
-            .graphicsLayer {
-                rotationY = rotation.value
-                cameraDistance = 12f * density
-            }
-    ) {
-        if (rotation.value <= 90f) {
-            front()
-        } else {
-            Box(modifier = Modifier
-                .fillMaxSize()
+
+
+        Card(
+            onClick = {
+                onClick(tileState.cardFace)
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+            },
+            modifier = modifier
+                .aspectRatio(1f)
                 .graphicsLayer {
-                    rotationY = 180f
+                    rotationY = rotation.value
+                    cameraDistance = 12f * density
+                },
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        ) {
+            AnimatedVisibility(visible = tileState.isVisible, exit = fadeOut()) {
+            if (rotation.value <= 90f) {
+                FrontFace()
+            } else {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        rotationY = 180f
+                    }
+                ) {
+                    BackFace(tile = tileState.tile)
                 }
-            ) {
-                back()
             }
         }
     }
@@ -107,7 +108,7 @@ fun FrontFace(
 
 @Composable
 fun BackFace(
-    tileState: TileState,
+    tile: Tile,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -120,7 +121,7 @@ fun BackFace(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                imageVector = ImageVector.vectorResource(id = tileState.tile.imageRes),
+                imageVector = ImageVector.vectorResource(id = tile.imageRes),
                 contentDescription = ""
             )
         }
@@ -143,7 +144,10 @@ enum class CardFace(val angle: Float) {
 @Preview
 @Composable
 fun ImageTilePreview() {
-    var cardFace by remember { mutableStateOf(CardFace.Front) }
+    var tileState = TileState(
+        tile = Tile("dragon", drawable.dragon),
+        position = 0
+    )
     BackgroundGradient {
         Box(
             modifier = Modifier
@@ -152,27 +156,10 @@ fun ImageTilePreview() {
             contentAlignment = Alignment.Center
         ) {
             ImageTile(
-                cardFace = cardFace,
-                onClick = { cardFace = cardFace.next },
+                onClick = { tileState = tileState.copy(cardFace = it.next) },
                 modifier = Modifier.size(100.dp),
-                front = {
-                    FrontFace()
-                },
-                back = {
-                    BackFace(
-                        tileState = TileState(
-                            isRevealed = false,
-                            tile = Tile("dragon", drawable.dragon)
-                        )
-                    )
-                }
+                tileState = tileState
             )
         }
     }
 }
-
-// TODO: Move to ViewModel
-data class TileState(
-    val isRevealed: Boolean,
-    val tile: Tile,
-)

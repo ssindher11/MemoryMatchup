@@ -23,9 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,12 +31,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cutetech.memorymatchup.R.string
-import com.cutetech.memorymatchup.domain.model.Tile
 import com.cutetech.memorymatchup.presentation.BackgroundGradient
 import com.cutetech.memorymatchup.ui.theme.museoFontFamily
-import com.cutetech.memorymatchup.utils.ResourceStateRender
+import com.cutetech.memorymatchup.utils.LifecycleLaunchedEffect
 import com.cutetech.memorymatchup.utils.isTablet
 
 @Composable
@@ -48,10 +45,15 @@ fun GameScreen(
 ) {
     val gameViewModel: GameViewModel = viewModel()
 
+    LifecycleLaunchedEffect(keys = arrayOf(), lifecycleEvent = Lifecycle.Event.ON_PAUSE) {
+        gameViewModel.onEvent(GameScreenEvent.PauseStateChanged(true))
+    }
+
     LaunchedEffect(gameMode) {
         gameViewModel.getTilesForGame(gameMode)
     }
-    val tilesListState = gameViewModel.tilesState.collectAsState()
+    val timerValue by gameViewModel.timerValue.collectAsState()
+    val screenState = gameViewModel.state
     val nColumns = if (isTablet()) 6 else 4
 
     BackgroundGradient {
@@ -63,17 +65,16 @@ fun GameScreen(
             Column(Modifier.fillMaxSize()) {
                 AppBar(
                     onBackPress = { /*TODO*/ },
-                    onPausePress = { gameViewModel.isGamePaused = true }
+                    onPausePress = { gameViewModel.onEvent(GameScreenEvent.PauseStateChanged(true)) }
                 )
 
-                ResourceStateRender(
-                    state = tilesListState,
-                    onLoading = {
-                        LoadingBox(Modifier.fillMaxSize(0.9f))
-                    }
-                ) { tilesList ->
+                if (screenState.isLoading) {
+                    LoadingBox(Modifier.fillMaxSize(0.9f))
+                } else {
+                    val tilesList = screenState.tilesStateList
+
                     Text(
-                        text = "04:20",
+                        text = timerValue,
                         fontFamily = museoFontFamily,
                         textAlign = TextAlign.Center,
                         color = Color.White,
@@ -85,7 +86,7 @@ fun GameScreen(
                     )
 
                     Text(
-                        text = "Flips: ${gameViewModel.flips}",
+                        text = "Flips: ${screenState.nFlips}",
                         fontFamily = museoFontFamily,
                         textAlign = TextAlign.Center,
                         color = Color.White,
@@ -110,34 +111,29 @@ fun GameScreen(
                         )
                     ) {
                         items(tilesList.size) { index ->
-                            var cardFace by remember { mutableStateOf(CardFace.Front) }
-                            val tile = tilesList[index]
-                            val tileState = remember {
-                                TileState(
-                                    isRevealed = false,
-                                    tile = Tile(tile.name, tile.imageRes)
-                                )
-                            }
+                            val tileState = tilesList[index]
 
                             ImageTile(
-                                cardFace = cardFace,
-                                onClick = { cardFace = cardFace.next },
-                                front = { FrontFace() },
-                                back = { BackFace(tileState = tileState) }
+                                onClick = {
+                                    gameViewModel.onEvent(
+                                        GameScreenEvent.TileFlipped(tileState, index)
+                                    )
+                                },
+                                tileState = tileState
                             )
                         }
                     }
                 }
             }
 
-            AnimatedVisibility(visible = gameViewModel.isGamePaused) {
+            AnimatedVisibility(visible = screenState.isPaused) {
                 PauseBox(
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxHeight(0.6f)
                         .fillMaxWidth(),
                     onResume = {
-                        gameViewModel.isGamePaused = false
+                        gameViewModel.onEvent(GameScreenEvent.PauseStateChanged(false))
                     },
                     onExit = {}
                 )
