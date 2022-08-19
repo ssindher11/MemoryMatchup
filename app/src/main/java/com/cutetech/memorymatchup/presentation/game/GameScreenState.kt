@@ -6,9 +6,11 @@ data class GameScreenState(
     val tilesStateList: MutableList<TileState> = mutableListOf(),
     val isLoading: Boolean = false,
     val isPaused: Boolean = false,
+    val isEnded: Boolean = false,
     val nFlips: Int = 0,
     val revealedTile: TileState? = null,
     val matchedPairs: Int = 0,
+    val gameScore: Int = 0,
 )
 
 data class TileState(

@@ -4,4 +4,8 @@
     <string name="resume">RESUME</string>
     <string name="exit">EXIT</string>
     <string name="loading">Loading…</string>
+    <string name="well_done">WELL DONE</string>
+    <string name="great_game">GREAT GAME</string>
+    <string name="excellent">EXCELLENT</string>
+    <string name="new_game">NEW GAME</string>
 </resources>

@@ -38,6 +38,9 @@ import com.cutetech.memorymatchup.presentation.BackgroundGradient
 import com.cutetech.memorymatchup.ui.theme.museoFontFamily
 import com.cutetech.memorymatchup.utils.LifecycleLaunchedEffect
 import com.cutetech.memorymatchup.utils.isTablet
+import nl.dionsegijn.konfetti.compose.KonfettiView
+import nl.dionsegijn.konfetti.compose.OnParticleSystemUpdateListener
+import nl.dionsegijn.konfetti.core.PartySystem
 
 @Composable
 fun GameScreen(
@@ -54,7 +57,7 @@ fun GameScreen(
     }
     val timerValue by gameViewModel.timerValue.collectAsState()
     val screenState = gameViewModel.state
-    val nColumns = if (isTablet()) 6 else 4
+    val confettiState by gameViewModel.confettiState.collectAsState()
 
     BackgroundGradient {
         Box(
@@ -71,59 +74,29 @@ fun GameScreen(
                 if (screenState.isLoading) {
                     LoadingBox(Modifier.fillMaxSize(0.9f))
                 } else {
-                    val tilesList = screenState.tilesStateList
-
-                    Text(
-                        text = timerValue,
-                        fontFamily = museoFontFamily,
-                        textAlign = TextAlign.Center,
-                        color = Color.White,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 36.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 20.dp)
-                    )
-
-                    Text(
-                        text = "Flips: ${screenState.nFlips}",
-                        fontFamily = museoFontFamily,
-                        textAlign = TextAlign.Center,
-                        color = Color.White,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 20.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp)
-                    )
-
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(nColumns),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(top = 64.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 16.dp
-                        )
+                    TilesGrid(
+                        screenState = screenState,
+                        timerValue = timerValue,
                     ) {
-                        items(tilesList.size) { index ->
-                            val tileState = tilesList[index]
-
-                            ImageTile(
-                                onClick = {
-                                    gameViewModel.onEvent(
-                                        GameScreenEvent.TileFlipped(tileState, index)
-                                    )
-                                },
-                                tileState = tileState
-                            )
-                        }
+                        gameViewModel.onEvent(it)
                     }
                 }
+            }
+
+            ConfettiBox(confettiState = confettiState, modifier = Modifier.fillMaxSize()) {
+                gameViewModel.onEvent(GameScreenEvent.ConfettiStateChanged(toStart = false))
+            }
+
+            AnimatedVisibility(visible = screenState.isEnded) {
+                GameOverBox(
+                    gameScore = screenState.gameScore,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxHeight(0.6f)
+                        .fillMaxWidth(),
+                    onNewGame = { /*TODO*/ },
+                    onExit = { /*TODO*/ }
+                )
             }
 
             AnimatedVisibility(visible = screenState.isPaused) {
@@ -135,7 +108,7 @@ fun GameScreen(
                     onResume = {
                         gameViewModel.onEvent(GameScreenEvent.PauseStateChanged(false))
                     },
-                    onExit = {}
+                    onExit = { /*TODO*/ }
                 )
             }
         }
@@ -194,5 +167,87 @@ private fun LoadingBox(modifier: Modifier = Modifier) {
             fontSize = 40.sp,
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+@Composable
+private fun TilesGrid(
+    screenState: GameScreenState,
+    timerValue: String,
+    onTileFlip: (GameScreenEvent.TileFlipped) -> Unit,
+) {
+    val tilesList = screenState.tilesStateList
+    val nColumns = if (isTablet()) 6 else 4
+
+    Text(
+        text = timerValue,
+        fontFamily = museoFontFamily,
+        textAlign = TextAlign.Center,
+        color = Color.White,
+        fontWeight = FontWeight.Medium,
+        fontSize = 36.sp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp)
+    )
+
+    Text(
+        text = "Flips: ${screenState.nFlips}",
+        fontFamily = museoFontFamily,
+        textAlign = TextAlign.Center,
+        color = Color.White,
+        fontWeight = FontWeight.Medium,
+        fontSize = 20.sp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+    )
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(nColumns),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 64.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 16.dp
+        )
+    ) {
+        items(tilesList.size) { index ->
+            val tileState = tilesList[index]
+
+            ImageTile(
+                onClick = {
+                    onTileFlip(GameScreenEvent.TileFlipped(tileState, index))
+                },
+                tileState = tileState
+            )
+        }
+    }
+}
+
+@Composable
+private fun ConfettiBox(
+    confettiState: ConfettiState,
+    modifier: Modifier = Modifier,
+    onConfettiEnded: () -> Unit
+) {
+    Box(modifier = modifier) {
+        if (confettiState is ConfettiState.Started) {
+            KonfettiView(
+                parties = confettiState.party,
+                modifier = Modifier.fillMaxSize(),
+                updateListener = object : OnParticleSystemUpdateListener {
+                    override fun onParticleSystemEnded(system: PartySystem, activeSystems: Int) {
+                        if (activeSystems == 0) {
+                            onConfettiEnded()
+                        }
+                    }
+                }
+            )
+        }
     }
 }

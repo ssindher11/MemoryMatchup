@@ -14,6 +14,10 @@ val museoFontFamily = FontFamily(
     Font(R.font.museo_moderno_medium, weight = FontWeight.Medium, style = FontStyle.Normal),
 )
 
+val vanillaDreamersFontFamily = FontFamily(
+    Font(R.font.vanilla_dreamers, weight = FontWeight.Normal, style = FontStyle.Normal)
+)
+
 // Set of Material typography styles to start with
 val Typography = Typography(
     bodyLarge = TextStyle(

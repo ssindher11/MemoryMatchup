@@ -7,9 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cutetech.memorymatchup.domain.TimerOrchestrator
 import com.cutetech.memorymatchup.domain.repository.ContentRepository
+import com.cutetech.memorymatchup.utils.KonfettiPresets
 import com.cutetech.memorymatchup.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,6 +25,9 @@ class GameViewModel @Inject constructor(
     var state by mutableStateOf(GameScreenState())
     val timerValue = timerOrchestrator.ticker
 
+    private val _confettiState = MutableStateFlow<ConfettiState>(ConfettiState.Idle)
+    val confettiState = _confettiState.asStateFlow()
+
     init {
         timerOrchestrator.start()
     }
@@ -30,7 +36,13 @@ class GameViewModel @Inject constructor(
         when (event) {
             GameScreenEvent.GameEnded -> {
                 timerOrchestrator.stop()
-                // TODO: Calculate final score
+                onEvent(GameScreenEvent.ConfettiStateChanged(toStart = true))
+
+                val gameScore = calculateGameScore(
+                    state.nFlips,
+                    state.tilesStateList.size,
+                )
+                state = state.copy(isEnded = true, gameScore = gameScore)
             }
 
             is GameScreenEvent.PauseStateChanged -> {
@@ -71,6 +83,14 @@ class GameViewModel @Inject constructor(
                             closeTiles(revealedTile.position, event.position)
                         }
                     }
+                }
+            }
+
+            is GameScreenEvent.ConfettiStateChanged -> {
+                _confettiState.value = if (event.toStart) {
+                    ConfettiState.Started(KonfettiPresets.rain())
+                } else {
+                    ConfettiState.Idle
                 }
             }
         }
@@ -127,6 +147,21 @@ class GameViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /**
+     * @param nFlips number of card flips
+     * @param elapsedTime time in milliseconds
+     * @return game score in (1 | 2 | 3)
+     */
+    private fun calculateGameScore(nFlips: Int, nTiles: Int): Int {
+        val accuracy = nTiles * 100.0 / nFlips
+        val nStars = when {
+            accuracy <= 43 -> 1
+            accuracy in 44.0..58.0 -> 2
+            else -> 3
+        }
+        return nStars
     }
 }
 
