@@ -71,8 +71,6 @@ class GameViewModel @Inject constructor(
                             closeTiles(revealedTile.position, event.position)
                         }
                     }
-
-                    state = state.copy(revealedTile = null)
                 }
             }
         }
@@ -92,6 +90,7 @@ class GameViewModel @Inject constructor(
 
             state.tilesStateList[i1] = t1
             state.tilesStateList[i2] = t2
+            state = state.copy(revealedTile = null)
         }
     }
 
@@ -109,6 +108,7 @@ class GameViewModel @Inject constructor(
 
             state.tilesStateList[i1] = t1
             state.tilesStateList[i2] = t2
+            state = state.copy(revealedTile = null)
         }
     }
 
