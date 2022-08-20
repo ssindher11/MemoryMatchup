@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,12 +24,12 @@ import com.cutetech.memorymatchup.R.drawable
 import com.cutetech.memorymatchup.R.string
 import com.cutetech.memorymatchup.presentation.BackgroundGradient
 import com.cutetech.memorymatchup.presentation.SpringButton
-import timber.log.Timber
-
-private val logger get() = Timber.tag("LandingScreenTAG")
+import com.cutetech.memorymatchup.presentation.level.ChooseLevelActivity
 
 @Composable
 fun LandingScreen() {
+    val context = LocalContext.current
+
     BackgroundGradient {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (topImageRef, titleRef, playBtnRef, coopBtnRef, bottomImageRef) = createRefs()
@@ -53,16 +54,16 @@ fun LandingScreen() {
             SpringButton(
                 text = stringResource(id = string.play),
                 modifier = Modifier.constrainAs(playBtnRef) {
-                    top.linkTo(titleRef.bottom, 36.dp)
+                    top.linkTo(titleRef.bottom, 64.dp)
                     start.linkTo(parent.start, 64.dp)
                     end.linkTo(parent.end, 64.dp)
                     width = Dimension.fillToConstraints
                 }
             ) {
-                // TODO
+                ChooseLevelActivity.launch(context)
             }
 
-            SpringButton(
+            /*SpringButton(
                 text = "PLAY CO-OP",
                 modifier = Modifier.constrainAs(coopBtnRef) {
                     top.linkTo(playBtnRef.bottom, 24.dp)
@@ -72,7 +73,7 @@ fun LandingScreen() {
                 }
             ) {
                 // TODO
-            }
+            }*/
 
             Image(
                 imageVector = ImageVector.vectorResource(id = drawable.corner_illustration),

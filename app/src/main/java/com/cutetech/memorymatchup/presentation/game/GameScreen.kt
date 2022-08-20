@@ -1,5 +1,6 @@
 package com.cutetech.memorymatchup.presentation.game
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,6 +37,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cutetech.memorymatchup.R.string
 import com.cutetech.memorymatchup.presentation.BackgroundGradient
+import com.cutetech.memorymatchup.presentation.landing.LandingActivity
 import com.cutetech.memorymatchup.ui.theme.museoFontFamily
 import com.cutetech.memorymatchup.utils.LifecycleLaunchedEffect
 import com.cutetech.memorymatchup.utils.isTablet
@@ -46,6 +49,9 @@ import nl.dionsegijn.konfetti.core.PartySystem
 fun GameScreen(
     gameMode: GameMode = GameMode.EASY
 ) {
+    val context = LocalContext.current
+    val onBackPressDispatcher = LocalOnBackPressedDispatcherOwner.current
+
     val gameViewModel: GameViewModel = viewModel()
 
     LifecycleLaunchedEffect(keys = arrayOf(), lifecycleEvent = Lifecycle.Event.ON_PAUSE) {
@@ -67,7 +73,7 @@ fun GameScreen(
 
             Column(Modifier.fillMaxSize()) {
                 AppBar(
-                    onBackPress = { /*TODO*/ },
+                    onBackPress = { onBackPressDispatcher?.onBackPressedDispatcher?.onBackPressed() },
                     onPausePress = { gameViewModel.onEvent(GameScreenEvent.PauseStateChanged(true)) }
                 )
 
@@ -94,8 +100,8 @@ fun GameScreen(
                         .padding(8.dp)
                         .fillMaxHeight(0.6f)
                         .fillMaxWidth(),
-                    onNewGame = { /*TODO*/ },
-                    onExit = { /*TODO*/ }
+                    onNewGame = { onBackPressDispatcher?.onBackPressedDispatcher?.onBackPressed() },
+                    onExit = { LandingActivity.clearLaunch(context) }
                 )
             }
 
@@ -108,7 +114,7 @@ fun GameScreen(
                     onResume = {
                         gameViewModel.onEvent(GameScreenEvent.PauseStateChanged(false))
                     },
-                    onExit = { /*TODO*/ }
+                    onExit = { LandingActivity.clearLaunch(context) }
                 )
             }
         }

@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -24,9 +25,13 @@ import com.cutetech.memorymatchup.R.drawable
 import com.cutetech.memorymatchup.R.string
 import com.cutetech.memorymatchup.presentation.BackgroundGradient
 import com.cutetech.memorymatchup.presentation.SpringButton
+import com.cutetech.memorymatchup.presentation.game.GameActivity
+import com.cutetech.memorymatchup.presentation.game.GameMode
 
 @Composable
 fun ChooseLevelScreen() {
+    val context = LocalContext.current
+
     BackgroundGradient {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (topImageRef, levelColumnRef, bottomImageRef) = createRefs()
@@ -42,15 +47,17 @@ fun ChooseLevelScreen() {
 
             LevelsColumn(
                 modifier = Modifier
-                .fillMaxWidth()
-                .constrainAs(levelColumnRef) {
-                    linkTo(
-                        top = parent.top,
-                        bottom = parent.bottom,
-                        bias = 0.4f
-                    )
-                }
-            )
+                    .fillMaxWidth()
+                    .constrainAs(levelColumnRef) {
+                        linkTo(
+                            top = parent.top,
+                            bottom = parent.bottom,
+                            bias = 0.4f
+                        )
+                    }
+            ) { gameMode ->
+                GameActivity.launch(context, GameActivity.Params(gameMode))
+            }
 
             Image(
                 imageVector = ImageVector.vectorResource(id = drawable.corner_illustration),
@@ -67,7 +74,10 @@ fun ChooseLevelScreen() {
 }
 
 @Composable
-fun LevelsColumn(modifier: Modifier = Modifier) {
+fun LevelsColumn(
+    modifier: Modifier = Modifier,
+    onClick: (GameMode) -> Unit,
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -89,7 +99,7 @@ fun LevelsColumn(modifier: Modifier = Modifier) {
                 .padding(horizontal = 64.dp)
                 .padding(top = 48.dp)
         ) {
-            // TODO
+            onClick(GameMode.EASY)
         }
 
         SpringButton(
@@ -98,7 +108,7 @@ fun LevelsColumn(modifier: Modifier = Modifier) {
                 .padding(horizontal = 64.dp)
                 .padding(top = 28.dp)
         ) {
-            // TODO
+            onClick(GameMode.MEDIUM)
         }
 
         SpringButton(
@@ -107,7 +117,7 @@ fun LevelsColumn(modifier: Modifier = Modifier) {
                 .padding(horizontal = 64.dp)
                 .padding(top = 28.dp)
         ) {
-            // TODO
+            onClick(GameMode.HARD)
         }
     }
 }
