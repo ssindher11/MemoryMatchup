@@ -31,22 +31,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cutetech.memorymatchup.R.string
 import com.cutetech.memorymatchup.presentation.BackgroundGradient
+import com.cutetech.memorymatchup.presentation.destinations.LandingScreenDestination
 import com.cutetech.memorymatchup.ui.theme.museoFontFamily
 import com.cutetech.memorymatchup.utils.LifecycleLaunchedEffect
 import com.cutetech.memorymatchup.utils.isTablet
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import nl.dionsegijn.konfetti.compose.KonfettiView
 import nl.dionsegijn.konfetti.compose.OnParticleSystemUpdateListener
 import nl.dionsegijn.konfetti.core.PartySystem
 
+@Destination
 @Composable
 fun GameScreen(
+    navigator: DestinationsNavigator,
     gameMode: GameMode = GameMode.EASY
 ) {
-    val gameViewModel: GameViewModel = viewModel()
+    val gameViewModel: GameViewModel = hiltViewModel()
 
     LifecycleLaunchedEffect(keys = arrayOf(), lifecycleEvent = Lifecycle.Event.ON_PAUSE) {
         gameViewModel.onEvent(GameScreenEvent.PauseStateChanged(true))
@@ -67,7 +72,7 @@ fun GameScreen(
 
             Column(Modifier.fillMaxSize()) {
                 AppBar(
-                    onBackPress = { /*TODO*/ },
+                    onBackPress = { navigator.popBackStack() },
                     onPausePress = { gameViewModel.onEvent(GameScreenEvent.PauseStateChanged(true)) }
                 )
 
@@ -94,8 +99,8 @@ fun GameScreen(
                         .padding(8.dp)
                         .fillMaxHeight(0.6f)
                         .fillMaxWidth(),
-                    onNewGame = { /*TODO*/ },
-                    onExit = { /*TODO*/ }
+                    onNewGame = { navigator.popBackStack() },
+                    onExit = { navigator.clearBackStack(LandingScreenDestination()) }
                 )
             }
 
@@ -108,7 +113,7 @@ fun GameScreen(
                     onResume = {
                         gameViewModel.onEvent(GameScreenEvent.PauseStateChanged(false))
                     },
-                    onExit = { /*TODO*/ }
+                    onExit = { navigator.clearBackStack(LandingScreenDestination()) }
                 )
             }
         }

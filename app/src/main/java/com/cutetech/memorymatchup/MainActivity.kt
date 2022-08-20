@@ -3,19 +3,25 @@ package com.cutetech.memorymatchup
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.cutetech.memorymatchup.presentation.game.GameScreen
+import androidx.compose.animation.ExperimentalAnimationApi
+import com.cutetech.memorymatchup.presentation.BackgroundGradient
+import com.cutetech.memorymatchup.presentation.NavGraphs
 import com.cutetech.memorymatchup.ui.theme.MemoryMatchupTheme
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialNavigationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MemoryMatchupTheme {
-                // A surface container using the 'background' color from the theme
-//                LandingScreen()
-                GameScreen()
+                BackgroundGradient {
+                    DestinationsNavHost(navGraph = NavGraphs.root, engine = rememberAnimatedNavHostEngine())
+                }
             }
         }
     }

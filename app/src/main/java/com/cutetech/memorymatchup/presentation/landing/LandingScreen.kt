@@ -23,12 +23,15 @@ import com.cutetech.memorymatchup.R.drawable
 import com.cutetech.memorymatchup.R.string
 import com.cutetech.memorymatchup.presentation.BackgroundGradient
 import com.cutetech.memorymatchup.presentation.SpringButton
-import timber.log.Timber
+import com.cutetech.memorymatchup.presentation.destinations.ChooseLevelScreenDestination
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-private val logger get() = Timber.tag("LandingScreenTAG")
-
+@Destination(start = true)
 @Composable
-fun LandingScreen() {
+fun LandingScreen(
+    navigator: DestinationsNavigator,
+) {
     BackgroundGradient {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (topImageRef, titleRef, playBtnRef, coopBtnRef, bottomImageRef) = createRefs()
@@ -59,7 +62,7 @@ fun LandingScreen() {
                     width = Dimension.fillToConstraints
                 }
             ) {
-                // TODO
+                navigator.navigate(ChooseLevelScreenDestination())
             }
 
             SpringButton(
@@ -114,5 +117,5 @@ private fun TitleAndLogo(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 fun LandingScreenPreview() {
-    LandingScreen()
+//    LandingScreen()
 }
