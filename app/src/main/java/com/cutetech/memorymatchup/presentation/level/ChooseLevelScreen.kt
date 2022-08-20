@@ -1,9 +1,10 @@
-package com.cutetech.memorymatchup.presentation.landing
+package com.cutetech.memorymatchup.presentation.level
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,24 +15,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import com.cutetech.memorymatchup.R.drawable
 import com.cutetech.memorymatchup.R.string
 import com.cutetech.memorymatchup.presentation.BackgroundGradient
 import com.cutetech.memorymatchup.presentation.SpringButton
-import timber.log.Timber
-
-private val logger get() = Timber.tag("LandingScreenTAG")
 
 @Composable
-fun LandingScreen() {
+fun ChooseLevelScreen() {
     BackgroundGradient {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (topImageRef, titleRef, playBtnRef, coopBtnRef, bottomImageRef) = createRefs()
+            val (topImageRef, levelColumnRef, bottomImageRef) = createRefs()
 
             Image(
                 imageVector = ImageVector.vectorResource(id = drawable.corner_illustration),
@@ -42,37 +40,17 @@ fun LandingScreen() {
                 }
             )
 
-            TitleAndLogo(
-                modifier = Modifier.constrainAs(titleRef) {
-                    top.linkTo(topImageRef.bottom, 16.dp)
-                    start.linkTo(parent.start, 16.dp)
-                    end.linkTo(parent.end, 16.dp)
+            LevelsColumn(
+                modifier = Modifier
+                .fillMaxWidth()
+                .constrainAs(levelColumnRef) {
+                    linkTo(
+                        top = parent.top,
+                        bottom = parent.bottom,
+                        bias = 0.4f
+                    )
                 }
             )
-
-            SpringButton(
-                text = stringResource(id = string.play),
-                modifier = Modifier.constrainAs(playBtnRef) {
-                    top.linkTo(titleRef.bottom, 36.dp)
-                    start.linkTo(parent.start, 64.dp)
-                    end.linkTo(parent.end, 64.dp)
-                    width = Dimension.fillToConstraints
-                }
-            ) {
-                // TODO
-            }
-
-            SpringButton(
-                text = "PLAY CO-OP",
-                modifier = Modifier.constrainAs(coopBtnRef) {
-                    top.linkTo(playBtnRef.bottom, 24.dp)
-                    start.linkTo(parent.start, 64.dp)
-                    end.linkTo(parent.end, 64.dp)
-                    width = Dimension.fillToConstraints
-                }
-            ) {
-                // TODO
-            }
 
             Image(
                 imageVector = ImageVector.vectorResource(id = drawable.corner_illustration),
@@ -89,30 +67,53 @@ fun LandingScreen() {
 }
 
 @Composable
-private fun TitleAndLogo(modifier: Modifier = Modifier) {
+fun LevelsColumn(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(id = string.memory_matchup),
+            text = stringResource(id = string.choose_level),
             style = MaterialTheme.typography.displaySmall.copy(
                 letterSpacing = 1.1.sp,
                 lineHeight = 44.sp
             ),
+            textAlign = TextAlign.Center,
             color = Color.White,
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
 
-        Image(
-            imageVector = ImageVector.vectorResource(id = drawable.home_illustration),
-            contentDescription = ""
-        )
+        SpringButton(
+            text = stringResource(id = string.easy),
+            modifier = Modifier
+                .padding(horizontal = 64.dp)
+                .padding(top = 48.dp)
+        ) {
+            // TODO
+        }
+
+        SpringButton(
+            text = stringResource(id = string.medium),
+            modifier = Modifier
+                .padding(horizontal = 64.dp)
+                .padding(top = 28.dp)
+        ) {
+            // TODO
+        }
+
+        SpringButton(
+            text = stringResource(id = string.hard),
+            modifier = Modifier
+                .padding(horizontal = 64.dp)
+                .padding(top = 28.dp)
+        ) {
+            // TODO
+        }
     }
 }
 
 @Preview
 @Composable
-fun LandingScreenPreview() {
-    LandingScreen()
+private fun ChooseLevelScreenPreview() {
+    ChooseLevelScreen()
 }

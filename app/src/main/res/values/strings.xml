@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Memory Matchup</string>
+    <string name="memory_matchup">Memory\nMatchup</string>
+    <string name="play">PLAY</string>
     <string name="paused">PAUSED</string>
     <string name="resume">RESUME</string>
     <string name="exit">EXIT</string>
@@ -8,4 +10,8 @@
     <string name="great_game">GREAT GAME</string>
     <string name="excellent">EXCELLENT</string>
     <string name="new_game">NEW GAME</string>
+    <string name="choose_level">CHOOSE\nLEVEL</string>
+    <string name="easy">EASY</string>
+    <string name="medium">MEDIUM</string>
+    <string name="hard">HARD</string>
 </resources>
