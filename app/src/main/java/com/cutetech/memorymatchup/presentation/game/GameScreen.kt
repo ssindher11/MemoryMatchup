@@ -146,29 +146,12 @@ fun GameScreen(
     }
 
     BackHandler() {
-        if (screenState.isPaused) {
-            // Dismiss the paused dialog
-            gameViewModel.onEvent(
-                GameScreenEvent.PauseStateChanged(
-                    isPaused = false,
-                    isLeaving = false
-                )
-            )
-        } else {
-            // Show warning dialog on backPressed
-            gameViewModel.onEvent(
-                GameScreenEvent.PauseStateChanged(
-                    isPaused = true,
-                    isLeaving = true
-                )
-            )
-        }
-        /*gameViewModel.onEvent(
+        gameViewModel.onEvent(
             GameScreenEvent.PauseStateChanged(
                 isPaused = !screenState.isPaused,
                 isLeaving = !screenState.isPaused
             )
-        )*/
+        )
     }
 }
 

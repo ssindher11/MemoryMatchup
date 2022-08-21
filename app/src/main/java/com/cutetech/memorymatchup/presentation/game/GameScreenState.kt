@@ -9,9 +9,9 @@ data class GameScreenState(
     val isEnded: Boolean = false,
     val isQuitting: Boolean = false,
     val nFlips: Int = 0,
-    val revealedTile: TileState? = null,
     val matchedPairs: Int = 0,
     val gameScore: Int = 0,
+    val revealedTilesMap: HashMap<Int, TileState> = hashMapOf()
 )
 
 data class TileState(

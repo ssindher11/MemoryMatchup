@@ -43,17 +43,7 @@ class GameViewModel @Inject constructor(
 
             is GameScreenEvent.NewGame -> {
                 getTilesForGame(event.gameMode)
-                state = state.copy(
-                    tilesStateList = mutableListOf(),
-                    isLoading = false,
-                    isPaused = false,
-                    isEnded = false,
-                    isQuitting = false,
-                    nFlips = 0,
-                    revealedTile = null,
-                    matchedPairs = 0,
-                    gameScore = 0,
-                )
+                state = GameScreenState()
             }
 
             is GameScreenEvent.PauseStateChanged -> {
@@ -66,10 +56,12 @@ class GameViewModel @Inject constructor(
             }
 
             is GameScreenEvent.TileFlipped -> {
-                // Do nothing if tile is already flipped
-                if (state.revealedTile?.position == event.position) {
+                val tryingToFlipSameTile = state.revealedTilesMap.containsKey(event.position)
+                val tryingToOpenMoreTiles = state.revealedTilesMap.size > 1
+                if (tryingToFlipSameTile || tryingToOpenMoreTiles) {
                     return
                 }
+
                 // Increase flip count
                 state = state.copy(nFlips = state.nFlips + 1)
 
@@ -77,22 +69,21 @@ class GameViewModel @Inject constructor(
                 val newTileValue = event.tileState.copy(cardFace = CardFace.Back)
                 state.tilesStateList[event.position] = newTileValue
 
-                // Match against flipped tile else set it
-                if (state.revealedTile == null) {
-                    // Set tile to open in state
-                    state = state.copy(revealedTile = event.tileState)
-                } else {
-                    // Match and close / hide tiles
-                    state.revealedTile?.let { revealedTile ->
-                        if (revealedTile.tile.name == event.tileState.tile.name) {
-                            hideTiles(revealedTile.position, event.position)
-                            state = state.copy(matchedPairs = state.matchedPairs + 1)
-                            if (state.matchedPairs == (state.tilesStateList.size / 2)) {
-                                onEvent(GameScreenEvent.GameEnded)
-                            }
-                        } else {
-                            closeTiles(revealedTile.position, event.position)
+                state.revealedTilesMap[event.position] = event.tileState
+
+                if (state.revealedTilesMap.size == 2) {
+                    val revealedTile = state.revealedTilesMap.values.first()
+                    val currentTile = state.revealedTilesMap.values.last()
+                    val areTilesMatching = revealedTile.tile.name == currentTile.tile.name
+                    if (areTilesMatching) {
+                        hideTiles(revealedTile.position, currentTile.position)
+                        state = state.copy(matchedPairs = state.matchedPairs + 1)
+                        val allPairsAreMatched = state.matchedPairs == state.tilesStateList.size / 2
+                        if (allPairsAreMatched) {
+                            onEvent(GameScreenEvent.GameEnded)
                         }
+                    } else {
+                        closeTiles(revealedTile.position, currentTile.position)
                     }
                 }
             }
@@ -121,7 +112,7 @@ class GameViewModel @Inject constructor(
 
             state.tilesStateList[i1] = t1
             state.tilesStateList[i2] = t2
-            state = state.copy(revealedTile = null)
+            state.revealedTilesMap.clear()
         }
     }
 
@@ -139,7 +130,7 @@ class GameViewModel @Inject constructor(
 
             state.tilesStateList[i1] = t1
             state.tilesStateList[i2] = t2
-            state = state.copy(revealedTile = null)
+            state.revealedTilesMap.clear()
         }
     }
 
