@@ -229,7 +229,7 @@ private fun TilesGrid(
     } else {
         when (gameMode) {
             GameMode.EASY -> 4
-            GameMode.MEDIUM -> 4
+            GameMode.MEDIUM -> 5
             GameMode.HARD -> 6
         }
     }
