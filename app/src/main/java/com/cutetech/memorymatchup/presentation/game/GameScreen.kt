@@ -145,7 +145,7 @@ fun GameScreen(
         }
     }
 
-    BackHandler() {
+    BackHandler {
         gameViewModel.onEvent(
             GameScreenEvent.PauseStateChanged(
                 isPaused = !screenState.isPaused,
