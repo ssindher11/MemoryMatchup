@@ -32,12 +32,14 @@ import androidx.compose.ui.unit.sp
 import com.cutetech.memorymatchup.R.string
 import com.cutetech.memorymatchup.presentation.BackgroundGradient
 import com.cutetech.memorymatchup.ui.theme.AccentBlue
+import com.cutetech.memorymatchup.ui.theme.ErrorRed
 import com.cutetech.memorymatchup.ui.theme.vanillaDreamersFontFamily
 import com.cutetech.memorymatchup.utils.LinearGradient
 
 @Composable
 fun PauseBox(
     modifier: Modifier = Modifier,
+    isQuitting: Boolean = false,
     onResume: () -> Unit,
     onExit: () -> Unit,
 ) {
@@ -54,7 +56,7 @@ fun PauseBox(
 
         Box(modifier = Modifier.fillMaxSize()) {
             Text(
-                text = stringResource(id = string.paused),
+                text = stringResource(id = if (isQuitting) string.leave_game else string.paused),
                 color = Color.Black,
                 fontSize = 64.sp,
                 fontFamily = vanillaDreamersFontFamily,
@@ -91,7 +93,7 @@ fun PauseBox(
                     contentPadding = PaddingValues(vertical = 12.dp),
                 ) {
                     Text(
-                        text = stringResource(id = string.resume),
+                        text = stringResource(id = if (isQuitting) string.no else string.resume),
                         fontSize = 28.sp,
                         fontFamily = vanillaDreamersFontFamily,
                     )
@@ -100,8 +102,8 @@ fun PauseBox(
                 Button(
                     onClick = onExit,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
+                        containerColor = ErrorRed,
+                        contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(8.dp),
                     elevation = ButtonDefaults.buttonElevation(
@@ -112,7 +114,7 @@ fun PauseBox(
                     contentPadding = PaddingValues(vertical = 12.dp),
                 ) {
                     Text(
-                        text = stringResource(id = string.exit),
+                        text = stringResource(id = if (isQuitting) string.yes else string.exit),
                         fontSize = 28.sp,
                         fontFamily = vanillaDreamersFontFamily,
                     )

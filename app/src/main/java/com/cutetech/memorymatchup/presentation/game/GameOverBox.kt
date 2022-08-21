@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.cutetech.memorymatchup.R.drawable
 import com.cutetech.memorymatchup.R.string
 import com.cutetech.memorymatchup.ui.theme.AccentBlue
+import com.cutetech.memorymatchup.ui.theme.ErrorRed
 import com.cutetech.memorymatchup.ui.theme.vanillaDreamersFontFamily
 
 @Composable
@@ -121,8 +122,8 @@ fun GameOverBox(
                 Button(
                     onClick = onExit,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
+                        containerColor = ErrorRed,
+                        contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(8.dp),
                     elevation = ButtonDefaults.buttonElevation(

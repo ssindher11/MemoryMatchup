@@ -7,6 +7,7 @@ data class GameScreenState(
     val isLoading: Boolean = false,
     val isPaused: Boolean = false,
     val isEnded: Boolean = false,
+    val isQuitting: Boolean = false,
     val nFlips: Int = 0,
     val revealedTile: TileState? = null,
     val matchedPairs: Int = 0,

@@ -28,10 +28,6 @@ class GameViewModel @Inject constructor(
     private val _confettiState = MutableStateFlow<ConfettiState>(ConfettiState.Idle)
     val confettiState = _confettiState.asStateFlow()
 
-    init {
-        timerOrchestrator.start()
-    }
-
     fun onEvent(event: GameScreenEvent) {
         when (event) {
             GameScreenEvent.GameEnded -> {
@@ -45,8 +41,23 @@ class GameViewModel @Inject constructor(
                 state = state.copy(isEnded = true, gameScore = gameScore)
             }
 
+            is GameScreenEvent.NewGame -> {
+                getTilesForGame(event.gameMode)
+                state = state.copy(
+                    tilesStateList = mutableListOf(),
+                    isLoading = false,
+                    isPaused = false,
+                    isEnded = false,
+                    isQuitting = false,
+                    nFlips = 0,
+                    revealedTile = null,
+                    matchedPairs = 0,
+                    gameScore = 0,
+                )
+            }
+
             is GameScreenEvent.PauseStateChanged -> {
-                state = state.copy(isPaused = event.isPaused)
+                state = state.copy(isPaused = event.isPaused, isQuitting = event.isLeaving)
                 if (event.isPaused) {
                     timerOrchestrator.pause()
                 } else {
@@ -132,7 +143,8 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    fun getTilesForGame(gameMode: GameMode) {
+    private fun getTilesForGame(gameMode: GameMode) {
+        timerOrchestrator.stop()
         viewModelScope.launch {
             contentRepository.getTiles(gameMode.numberOfTiles).collect {
                 when (it) {
@@ -143,6 +155,7 @@ class GameViewModel @Inject constructor(
                             TileState(tile = tile, position = index)
                         } ?: emptyList()
                         state = state.copy(tilesStateList = tilesList.toMutableList())
+                        timerOrchestrator.start()
                     }
                 }
             }
@@ -151,7 +164,7 @@ class GameViewModel @Inject constructor(
 
     /**
      * @param nFlips number of card flips
-     * @param elapsedTime time in milliseconds
+     * @param nTiles total number of cards
      * @return game score in (1 | 2 | 3)
      */
     private fun calculateGameScore(nFlips: Int, nTiles: Int): Int {

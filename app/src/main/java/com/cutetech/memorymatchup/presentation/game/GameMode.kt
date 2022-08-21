@@ -6,6 +6,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 enum class GameMode(val numberOfTiles: Int) : Parcelable {
     EASY(16),
-    MEDIUM(24),
+    MEDIUM(20),
     HARD(36),
 }

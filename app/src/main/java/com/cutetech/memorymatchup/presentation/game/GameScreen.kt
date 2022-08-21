@@ -1,5 +1,6 @@
 package com.cutetech.memorymatchup.presentation.game
 
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
@@ -54,16 +55,23 @@ fun GameScreen(
 
     val gameViewModel: GameViewModel = viewModel()
 
-    LifecycleLaunchedEffect(keys = arrayOf(), lifecycleEvent = Lifecycle.Event.ON_PAUSE) {
-        gameViewModel.onEvent(GameScreenEvent.PauseStateChanged(true))
-    }
-
     LaunchedEffect(gameMode) {
-        gameViewModel.getTilesForGame(gameMode)
+        gameViewModel.onEvent(GameScreenEvent.NewGame(gameMode))
     }
     val timerValue by gameViewModel.timerValue.collectAsState()
     val screenState = gameViewModel.state
     val confettiState by gameViewModel.confettiState.collectAsState()
+
+    LifecycleLaunchedEffect(keys = arrayOf(), lifecycleEvent = Lifecycle.Event.ON_PAUSE) {
+        if (!screenState.isQuitting) {
+            gameViewModel.onEvent(
+                GameScreenEvent.PauseStateChanged(
+                    isPaused = true,
+                    isLeaving = false
+                )
+            )
+        }
+    }
 
     BackgroundGradient {
         Box(
@@ -73,8 +81,16 @@ fun GameScreen(
 
             Column(Modifier.fillMaxSize()) {
                 AppBar(
+                    areIconsVisible = !screenState.isPaused,
                     onBackPress = { onBackPressDispatcher?.onBackPressedDispatcher?.onBackPressed() },
-                    onPausePress = { gameViewModel.onEvent(GameScreenEvent.PauseStateChanged(true)) }
+                    onPausePress = {
+                        gameViewModel.onEvent(
+                            GameScreenEvent.PauseStateChanged(
+                                isPaused = true,
+                                isLeaving = false
+                            )
+                        )
+                    }
                 )
 
                 if (screenState.isLoading) {
@@ -82,6 +98,7 @@ fun GameScreen(
                 } else {
                     TilesGrid(
                         screenState = screenState,
+                        gameMode = gameMode,
                         timerValue = timerValue,
                     ) {
                         gameViewModel.onEvent(it)
@@ -100,29 +117,64 @@ fun GameScreen(
                         .padding(8.dp)
                         .fillMaxHeight(0.6f)
                         .fillMaxWidth(),
-                    onNewGame = { onBackPressDispatcher?.onBackPressedDispatcher?.onBackPressed() },
+                    onNewGame = {
+                        gameViewModel.onEvent(GameScreenEvent.NewGame(gameMode))
+                    },
                     onExit = { LandingActivity.clearLaunch(context) }
                 )
             }
 
             AnimatedVisibility(visible = screenState.isPaused) {
                 PauseBox(
+                    isQuitting = screenState.isQuitting,
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxHeight(0.6f)
                         .fillMaxWidth(),
                     onResume = {
-                        gameViewModel.onEvent(GameScreenEvent.PauseStateChanged(false))
+                        gameViewModel.onEvent(
+                            GameScreenEvent.PauseStateChanged(
+                                isPaused = false,
+                                isLeaving = false
+                            )
+                        )
                     },
                     onExit = { LandingActivity.clearLaunch(context) }
                 )
             }
         }
     }
+
+    BackHandler() {
+        if (screenState.isPaused) {
+            // Dismiss the paused dialog
+            gameViewModel.onEvent(
+                GameScreenEvent.PauseStateChanged(
+                    isPaused = false,
+                    isLeaving = false
+                )
+            )
+        } else {
+            // Show warning dialog on backPressed
+            gameViewModel.onEvent(
+                GameScreenEvent.PauseStateChanged(
+                    isPaused = true,
+                    isLeaving = true
+                )
+            )
+        }
+        /*gameViewModel.onEvent(
+            GameScreenEvent.PauseStateChanged(
+                isPaused = !screenState.isPaused,
+                isLeaving = !screenState.isPaused
+            )
+        )*/
+    }
 }
 
 @Composable
 private fun AppBar(
+    areIconsVisible: Boolean,
     modifier: Modifier = Modifier,
     onBackPress: () -> Unit,
     onPausePress: () -> Unit,
@@ -134,26 +186,27 @@ private fun AppBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(
-            onClick = onBackPress,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBackIosNew,
-                contentDescription = "Back",
-                tint = Color.White,
-            )
-        }
+        if (areIconsVisible) {
+            IconButton(
+                onClick = onBackPress,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = "Back",
+                    tint = Color.White,
+                )
+            }
 
-        IconButton(
-            onClick = onPausePress,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Pause,
-                contentDescription = "Pause",
-                tint = Color.White,
-            )
+            IconButton(
+                onClick = onPausePress,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Pause,
+                    contentDescription = "Pause",
+                    tint = Color.White,
+                )
+            }
         }
     }
 }
@@ -179,11 +232,24 @@ private fun LoadingBox(modifier: Modifier = Modifier) {
 @Composable
 private fun TilesGrid(
     screenState: GameScreenState,
+    gameMode: GameMode,
     timerValue: String,
     onTileFlip: (GameScreenEvent.TileFlipped) -> Unit,
 ) {
     val tilesList = screenState.tilesStateList
-    val nColumns = if (isTablet()) 6 else 4
+    val nColumns = if (isTablet()) {
+        when (gameMode) {
+            GameMode.EASY -> 4
+            GameMode.MEDIUM -> 5
+            GameMode.HARD -> 6
+        }
+    } else {
+        when (gameMode) {
+            GameMode.EASY -> 4
+            GameMode.MEDIUM -> 4
+            GameMode.HARD -> 6
+        }
+    }
 
     Text(
         text = timerValue,
@@ -214,8 +280,8 @@ private fun TilesGrid(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 64.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(
             start = 16.dp,
             end = 16.dp,
