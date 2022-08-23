@@ -36,6 +36,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.cutetech.memorymatchup.R.drawable
 import com.cutetech.memorymatchup.R.string
 import com.cutetech.memorymatchup.ui.theme.AccentBlue
@@ -56,18 +58,38 @@ fun GameOverBox(
         else -> stringResource(id = string.great_game)
     }
 
-    Box(
+    ConstraintLayout(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(AccentBlue)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
             ) {}
     ) {
-        BlurredBox()
+        val (columnRef, blurredBoxRef) = createRefs()
 
-        Column(modifier = Modifier.fillMaxSize()) {
+        BlurredBox(
+            modifier = Modifier
+                .background(AccentBlue)
+                .constrainAs(blurredBoxRef) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.start)
+                    width = Dimension.matchParent
+                    height = Dimension.fillToConstraints
+                }
+        )
+
+        Column(
+            modifier = Modifier.constrainAs(columnRef) {
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                start.linkTo(parent.start)
+                end.linkTo(parent.start)
+                width = Dimension.matchParent
+            }
+        ) {
             Text(
                 text = scoreText,
                 color = Color.Black,

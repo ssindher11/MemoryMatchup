@@ -58,7 +58,9 @@ class GameViewModel @Inject constructor(
             is GameScreenEvent.TileFlipped -> {
                 val tryingToFlipSameTile = state.revealedTilesMap.containsKey(event.position)
                 val tryingToOpenMoreTiles = state.revealedTilesMap.size > 1
-                if (tryingToFlipSameTile || tryingToOpenMoreTiles) {
+                val isGameNotReady =
+                    state.isEnded || state.isPaused || state.isQuitting || state.isLoading
+                if (tryingToFlipSameTile || tryingToOpenMoreTiles || isGameNotReady) {
                     return
                 }
 

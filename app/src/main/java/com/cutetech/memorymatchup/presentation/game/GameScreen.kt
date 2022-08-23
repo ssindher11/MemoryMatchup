@@ -115,7 +115,6 @@ fun GameScreen(
                     gameScore = screenState.gameScore,
                     modifier = Modifier
                         .padding(8.dp)
-                        .fillMaxHeight(0.6f)
                         .fillMaxWidth(),
                     onNewGame = {
                         gameViewModel.onEvent(GameScreenEvent.NewGame(gameMode))
@@ -129,7 +128,6 @@ fun GameScreen(
                     isQuitting = screenState.isQuitting,
                     modifier = Modifier
                         .padding(8.dp)
-                        .fillMaxHeight(0.6f)
                         .fillMaxWidth(),
                     onResume = {
                         gameViewModel.onEvent(
