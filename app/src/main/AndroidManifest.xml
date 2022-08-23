@@ -11,20 +11,22 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MemoryMatchup"
+        android:theme="@style/Theme.App.Starting"
         tools:ignore="LockedOrientationActivity"
         tools:targetApi="31">
         <activity
             android:name=".presentation.game.GameActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MemoryMatchup" />
         <activity
             android:name=".presentation.level.ChooseLevelActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MemoryMatchup" />
         <activity
             android:name=".presentation.landing.LandingActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.MemoryMatchup">
+            android:theme="@style/Theme.App.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
