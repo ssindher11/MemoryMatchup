@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cutetech.memorymatchup.domain.TimerOrchestrator
 import com.cutetech.memorymatchup.domain.repository.ContentRepository
+import com.cutetech.memorymatchup.domain.utilities.GameMediaPlayer
 import com.cutetech.memorymatchup.utils.KonfettiPresets
 import com.cutetech.memorymatchup.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class GameViewModel @Inject constructor(
     private val contentRepository: ContentRepository,
     private val timerOrchestrator: TimerOrchestrator,
+    private val gameMediaPlayer: GameMediaPlayer,
 ) : ViewModel() {
 
     var state by mutableStateOf(GameScreenState())
@@ -33,6 +35,7 @@ class GameViewModel @Inject constructor(
             GameScreenEvent.GameEnded -> {
                 timerOrchestrator.stop()
                 onEvent(GameScreenEvent.ConfettiStateChanged(toStart = true))
+                gameMediaPlayer.playLevelCompletedSound()
 
                 val gameScore = calculateGameScore(
                     state.nFlips,
@@ -50,8 +53,10 @@ class GameViewModel @Inject constructor(
                 state = state.copy(isPaused = event.isPaused, isQuitting = event.isLeaving)
                 if (event.isPaused) {
                     timerOrchestrator.pause()
+                    gameMediaPlayer.playPauseOpenSound()
                 } else {
                     timerOrchestrator.start()
+                    gameMediaPlayer.playPauseCloseSound()
                 }
             }
 
@@ -70,6 +75,7 @@ class GameViewModel @Inject constructor(
                 // Flip the tile
                 val newTileValue = event.tileState.copy(cardFace = CardFace.Back)
                 state.tilesStateList[event.position] = newTileValue
+                gameMediaPlayer.playFlipSound()
 
                 state.revealedTilesMap[event.position] = event.tileState
 
@@ -112,6 +118,7 @@ class GameViewModel @Inject constructor(
             val t1 = state.tilesStateList[i1].copy(isVisible = false)
             val t2 = state.tilesStateList[i2].copy(isVisible = false)
 
+            gameMediaPlayer.playSuccessSound()
             state.tilesStateList[i1] = t1
             state.tilesStateList[i2] = t2
             state.revealedTilesMap.clear()

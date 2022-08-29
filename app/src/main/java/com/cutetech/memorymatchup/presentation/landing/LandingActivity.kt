@@ -6,17 +6,35 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.cutetech.memorymatchup.domain.utilities.GameMediaPlayer
 import com.cutetech.memorymatchup.ui.theme.MemoryMatchupTheme
+import com.cutetech.memorymatchup.utils.Prefs
+import com.cutetech.memorymatchup.utils.PrefsConstants
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class LandingActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var gameMediaPlayer: GameMediaPlayer
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
             MemoryMatchupTheme {
-                LandingScreen()
+                LandingScreen(
+                    toggleSound = { turnOn ->
+                        Prefs[PrefsConstants.IS_SOUND_ON] = turnOn
+                        if (turnOn) {
+                            gameMediaPlayer.playGlobalMusic()
+                            gameMediaPlayer.playButtonClickSound()
+                        } else {
+                            gameMediaPlayer.pauseGlobalMusic()
+                        }
+                    }
+                )
             }
         }
     }

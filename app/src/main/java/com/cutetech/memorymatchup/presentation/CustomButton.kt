@@ -1,11 +1,11 @@
 package com.cutetech.memorymatchup.presentation
 
+import android.media.MediaPlayer
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,12 +26,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cutetech.memorymatchup.R
 import com.cutetech.memorymatchup.ui.theme.AccentBlue
 import com.cutetech.memorymatchup.ui.theme.museoFontFamily
 import kotlin.math.abs
@@ -40,6 +42,7 @@ import kotlin.math.abs
 fun SpringButton(
     text: String,
     modifier: Modifier = Modifier,
+    playDefaultSound: Boolean = true,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -51,6 +54,7 @@ fun SpringButton(
         buttonSize.height.toDp()
     }
 
+    val context = LocalContext.current
     val hapticFeedback = LocalHapticFeedback.current
     LaunchedEffect(key1 = isPressed) {
         if (isPressed) {
@@ -72,7 +76,12 @@ fun SpringButton(
         )
 
         Button(
-            onClick = onClick,
+            onClick = {
+                onClick()
+                if (playDefaultSound) {
+                    MediaPlayer.create(context, R.raw.button_press).start()
+                }
+            },
             colors = ButtonDefaults.buttonColors(containerColor = AccentBlue),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             shape = RoundedCornerShape(8.dp),
